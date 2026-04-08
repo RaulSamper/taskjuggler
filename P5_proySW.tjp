@@ -69,7 +69,7 @@ resource dev3 "Peter Green" {
   email "kkk@unizar.es"
 }
 
-resource student "Estudiante 897466" {
+resource Raul "Raul Samper" {
   email "897466@unizar.es"
   limits { dailymax 4h }
 }
