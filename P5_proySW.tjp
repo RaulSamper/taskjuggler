@@ -19,7 +19,7 @@ project pSix "Web Game"  2025-12-15 +5m {
   # the project reports. If not specified, the current day will be
   # used, but this will likely be outside of the project range, so it
   # can't be seen in the reports.
-  now 2026-02-25-13:00
+  now 2026-04-08-13:00
   # The currency for all money values is the US Dollar.
   currency "EUR"
 
@@ -67,6 +67,11 @@ resource dev2 "Samantha Müller" {
 }
 resource dev3 "Peter Green" {
   email "kkk@unizar.es"
+}
+
+resource student "Estudiante 897466" {
+  email "897466@unizar.es"
+  limits { dailymax 4h }
 }
 
 # Now we specify the work packages. The whole project is described as
@@ -146,16 +151,45 @@ task WMGame "Web & Mobile Game" {
       depends WMGame.twebF.tFEc
     }    
   }
+  task tmobF "Mobile Front End" {
+    purge chargeset
+    chargeset mFront
+    depends WMGame.tgdesign
+    task tmobDev "Mobile App Development" {
+      effort 10d
+      allocate student
+    }
+  }
+
+  task tcloud "Cloud Deployment" {
+    purge chargeset
+    chargeset manag
+    task tcloudEval "Cloud Provider Evaluation" {
+      effort 3d
+      allocate boss
+      depends WMGame.tgdesign
+    }
+    task tcloudDep "Backend Deployment" {
+      effort 2d
+      allocate student
+      depends WMGame.tcloud.tcloudEval, WMGame.tback
+    }
+  }
 
   task ttest "Acceptance tests" {
+      start 2026-05-15
       effort 10d
       allocate boss
       allocate dev2
-      actual:effort 20d
-      depends WMGame.twebF
-      depends WMGame.tback
+      # Dependencias: necesitamos que todo el front y el despliegue estén listos
+      depends WMGame.twebF, WMGame.tmobF, WMGame.tcloud
+      
+      journalentry 2026-04-08 "Revisión de progreso" {
+        author student
+        alert green
+        summary "Iniciada la configuración del entorno móvil y evaluación cloud."
       }
-
+  }
     
   task deliveries "Milestones" {
 
@@ -351,4 +385,10 @@ resourcereport resourceGraph "" {
   # We only like to show leaf tasks for leaf resources.
   hidetask ~(isleaf() & isleaf_())
   sorttasks plan.start.up
+}
+
+taskreport "InitialPlan" {
+  scenarios plan
+  headline "Planificación Inicial del Proyecto"
+  columns bsi { title 'WBS' }, name, start, end, effort, chart { ${TaskTip} }
 }
